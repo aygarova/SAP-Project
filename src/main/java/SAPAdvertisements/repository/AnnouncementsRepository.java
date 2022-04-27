@@ -12,11 +12,11 @@ public interface AnnouncementsRepository extends JpaRepository<Announcements, In
     List<Announcements> findByAnnouncementNumber(String announcementNumber);
 
     // find with status and between datefrom and dateto
-    @Query(value = "SELECT * FROM announcements a WHERE status IN (:status) and activatefrom >= :start and activateto <= :end", nativeQuery = true)
+    @Query(value = "SELECT * FROM announcements a WHERE status IN (:status) and a.activate_from >= :start and a.activate_to <= :end", nativeQuery = true)
     List<Announcements> getByStatusAndTimePeriod(@Param("status") List<String> status, @Param("start") Date startTime, @Param("end") Date endTime);
 
     // find new announcements with datefrom between two date
-    @Query(value = "SELECT * FROM announcements a WHERE  activatefrom BETWEEN :start and :end", nativeQuery = true)
+    @Query(value = "SELECT * FROM announcements a WHERE  a.activate_from BETWEEN :start and :end", nativeQuery = true)
     List<Announcements> getByDateCreated(@Param("start") Date startTime, @Param("end") Date endTime);
 
     // find with status
@@ -27,5 +27,9 @@ public interface AnnouncementsRepository extends JpaRepository<Announcements, In
     @Query(value = "select a.* from public.announcements a inner join public.wishlist w on w.announcement_id = a.announcement_id", nativeQuery = true)
     List<Announcements> findAllFavorites();
 
+    @Query("SELECT a FROM Announcements a WHERE a.announcementNumber IN (:announcementNumber)")
+    Announcements getAnnouncementsByNumber(String announcementNumber);
 
+    @Query("SELECT a FROM Announcements a WHERE a.announcementNumber IN (:announcementNumber)")
+    Announcements deleteDyAnnouncementNumber(String announcementNumber);
 }

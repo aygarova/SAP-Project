@@ -7,22 +7,24 @@ import javax.persistence.*;
 public class WishList {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int wishlist_id;
 
-    @Column(name = "user_id")
-    private Integer userID;
+    @OneToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "user_id", nullable = false)
+    private Users userID;
 
-    @Column(name = "announcement_id")
-    private Integer announcementID;
+    @ManyToOne
+    @JoinColumn (name = "announcement_id", nullable = false)
+    private Announcements announcementID;
 
     public WishList() {
     }
 
-    public WishList(int wishlist_id, int announcement_id, int user_id) {
+    public WishList(int wishlist_id, Users userID, Announcements announcementID) {
         this.wishlist_id = wishlist_id;
-        this.announcementID = announcement_id;
-        this.userID = user_id;
+        this.userID = userID;
+        this.announcementID = announcementID;
     }
 
     public int getWishlist_id() {
@@ -33,19 +35,19 @@ public class WishList {
         this.wishlist_id = wishlist_id;
     }
 
-    public Integer getAnnouncementID() {
-        return announcementID;
-    }
-
-    public void setAnnouncementID(Integer announcementID) {
-        this.announcementID = announcementID;
-    }
-
-    public Integer getUserID() {
+    public Users getUserID() {
         return userID;
     }
 
-    public void setUserID(Integer userID) {
+    public void setUserID(Users userID) {
         this.userID = userID;
+    }
+
+    public Announcements getAnnouncementID() {
+        return announcementID;
+    }
+
+    public void setAnnouncementID(Announcements announcementID) {
+        this.announcementID = announcementID;
     }
 }

@@ -1,62 +1,72 @@
 package SAPAdvertisements.models;
 
-import org.hibernate.annotations.CreationTimestamp;
-
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Entity
 @Table(name = "announcements")
 public class  Announcements {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int announcement_id;
 
-    @Column(name = "announcementname")
+    @Column(name = "announcement_name", nullable = false)
     private String announcementName;
 
-    @Column(name = "price")
+    @Column(name = "price",nullable = false, columnDefinition = "DECIMAL(10,2)")
     private double price;
 
-    @Column(name = "announcementnumber")
+    @Column(name = "announcement_number", nullable = false, unique = true)
     private String announcementNumber;
 
     @Column(name = "descriptions")
     private String descriptions;
 
-    @Column(name = "category_id")
-    private int category_id;
-
-    @Column(name = "user_id")
-    private int user_id;
-
-    @Column(name = "activatefrom")
-    @CreationTimestamp
+    @Column(name = "activate_from", nullable = false, columnDefinition = "DATE")
     private LocalDate dateFrom = LocalDate.now();
 
-    @Column(name = "activateto")
+    @Column(name = "activate_to", nullable = false, columnDefinition = "DATE")
     private LocalDate  dateTo = LocalDate.now().plusDays(30);
 
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
     private String status;
 
+    @ManyToOne
+    @JoinColumn(name = "category_id", nullable = false)
+    private Categories category_id;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private Users user_id;
+
+    @OneToMany(mappedBy = "announcementID", fetch = FetchType.EAGER)
+    private Set<WishList> wishLists;
 
     public Announcements() {
     }
 
-    public Announcements(int announcement_id,  String announcementName, double price,String announcementNumber, String descriptions, String status,LocalDate dateFrom, LocalDate dateTo, int category_id, int user_id) {
+    public Announcements(int announcement_id, String announcementName, double price, String announcementNumber, String descriptions, LocalDate dateFrom, LocalDate dateTo, String status, Categories category_id, Users user_id, Set<WishList> wishLists) {
         this.announcement_id = announcement_id;
         this.announcementName = announcementName;
         this.price = price;
         this.announcementNumber = announcementNumber;
         this.descriptions = descriptions;
-        this.category_id = category_id;
-        this.dateFrom =  dateFrom;
-        this.dateTo =  dateTo;
-        this.user_id = user_id;
+        this.dateFrom = dateFrom;
+        this.dateTo = dateTo;
         this.status = status;
+        this.category_id = category_id;
+        this.user_id = user_id;
+        this.wishLists = wishLists;
+    }
+
+    public Announcements(int announcement_id) {
+        this.announcement_id = announcement_id;
+    }
+
+    public Announcements(String announcementNumber) {
+        this.announcementNumber = announcementNumber;
     }
 
     public int getAnnouncement_id() {
@@ -99,20 +109,28 @@ public class  Announcements {
         this.descriptions = descriptions;
     }
 
-    public int getCategoryID() {
+    public Categories getCategory_id() {
         return category_id;
     }
 
-    public void setCategoryID(int category_id) {
+    public void setCategory_id(Categories category_id) {
         this.category_id = category_id;
     }
 
-    public int getUserID() {
+    public Users getUser_id() {
         return user_id;
     }
 
-    public void setUserID(int user_id) {
+    public void setUser_id(Users user_id) {
         this.user_id = user_id;
+    }
+
+    public Set<WishList> getWishLists() {
+        return wishLists;
+    }
+
+    public void setWishLists(Set<WishList> wishLists) {
+        this.wishLists = wishLists;
     }
 
     public LocalDate getDateFrom() {

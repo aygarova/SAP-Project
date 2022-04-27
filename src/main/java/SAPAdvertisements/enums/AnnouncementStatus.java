@@ -1,8 +1,8 @@
 package SAPAdvertisements.enums;
 
 public enum AnnouncementStatus {
-    ACTIVE("Active"),
-    INACTIVE("Inactive");
+    ACTIVE("ACTIVE"),
+    INACTIVE("INACTIVE");
 
     private final String status;
     AnnouncementStatus(String status) {

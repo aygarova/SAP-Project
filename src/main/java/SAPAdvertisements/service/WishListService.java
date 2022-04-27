@@ -38,11 +38,11 @@ public class WishListService {
     }
 
     public WishList addToWishList(WishList wishList) throws InvalidPropertyException {
-        if (!haveThisUserById(wishList.getUserID())){
+        if (!haveThisUserById(wishList.getUserID().getUser_id())){
             throw new InvalidPropertyException(ConstantMessages.INVALID_USER_ID_EXCEPTION);
         }
 
-        if (!haveThisAnnouncementById(wishList.getAnnouncementID())){
+        if (!haveThisAnnouncementById(wishList.getAnnouncementID().getAnnouncement_id())){
             throw new InvalidPropertyException(ConstantMessages.INVALID_ANNOUNCEMENT_ID_EXCEPTION);
         }
 

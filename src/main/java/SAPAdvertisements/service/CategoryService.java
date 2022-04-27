@@ -33,7 +33,6 @@ public class CategoryService {
         if (allCategoriesFromDB.size() == 0){
             throw new EmptyWishList(ConstantMessages.LIST_IS_EMPTY);
         }
-
         return allCategoriesFromDB;
     }
 
@@ -66,4 +65,9 @@ public class CategoryService {
         }
         return false;
     }
+
+    public Categories findCategoryId(String name){
+        return categoryRepository.findCategoryById(name);
+    }
+
 }
