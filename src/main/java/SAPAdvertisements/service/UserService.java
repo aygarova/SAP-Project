@@ -7,7 +7,6 @@ import SAPAdvertisements.exeptions.AlreadyExistsException;
 import SAPAdvertisements.exeptions.UserNotFoundException;
 import SAPAdvertisements.models.Users;
 import SAPAdvertisements.repository.UsersRepository;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,31 +18,28 @@ import java.util.List;
 @Service
 public class UserService {
 
+    private final UsersRepository usersRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    private UsersRepository usersRepository;
-
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    public UserService() {
-
+    public UserService(UsersRepository usersRepository, PasswordEncoder passwordEncoder) {
+        this.usersRepository = usersRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public Users readUser(String username) throws UserNotFoundException {
-        Users userToReturn = null;
-        List<Users> usersFromDB = usersRepository.findByUsername(username);
-        for (Users u : usersFromDB) {
-            if (u.getUsername().equals(username)){
-                userToReturn = u;
-            }
-        }
-        if (userToReturn == null){
+       // Users userToReturn = null;
+        Users usersFromDB = usersRepository.getUserByUsername(username);
+//        for (Users u : usersFromDB) {
+//            if (u.getUsername().equals(username)){
+//                userToReturn = u;
+//            }
+//        }
+        if (usersFromDB == null){
             throw new UserNotFoundException(ConstantMessages.USER_NOT_FOUND_EXCEPTION);
         }
 
-        return userToReturn;
+        return usersFromDB;
     }
 
     public Users createUser(Users user) throws InvalidPropertyException, AlreadyExistsException {

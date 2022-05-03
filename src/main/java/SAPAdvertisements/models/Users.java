@@ -124,21 +124,21 @@ public class Users implements UserDetails {
         this.userType = userType;
     }
 
-    public Set<Announcements> getAnnouncements() {
-        return announcements;
-    }
+//    public Set<Announcements> getAnnouncements() {
+//        return announcements;
+//    }
+//
+//    public void setAnnouncements(Set<Announcements> announcements) {
+//        this.announcements = announcements;
+//    }
 
-    public void setAnnouncements(Set<Announcements> announcements) {
-        this.announcements = announcements;
-    }
-
-    @Override
-    public String toString() {
-        return "Username = " + username +
-                ", password = " + password +
-                ", phoneNumber = " + phoneNumber +
-                ", email = " + email +
-                ", userType = " + userType;
-    }
+//    @Override
+//    public String toString() {
+//        return "Username = " + username +
+//                ", password = " + password +
+//                ", phoneNumber = " + phoneNumber +
+//                ", email = " + email +
+//                ", userType = " + userType;
+//    }
 
 }

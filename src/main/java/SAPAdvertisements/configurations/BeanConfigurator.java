@@ -1,5 +1,6 @@
 package SAPAdvertisements.configurations;
 
+import SAPAdvertisements.repository.UsersRepository;
 import SAPAdvertisements.service.AnnouncementService;
 import SAPAdvertisements.service.CategoryService;
 import SAPAdvertisements.service.UserService;
@@ -13,8 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 public class BeanConfigurator {
     @Bean
-    public UserService userService(){
-        return new UserService();
+    public UserService userService(UsersRepository usersRepository, PasswordEncoder passwordEncoder){
+        return new UserService(usersRepository, passwordEncoder);
     }
 
     @Bean
