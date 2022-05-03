@@ -7,8 +7,11 @@ import SAPAdvertisements.exeptions.AlreadyExistsException;
 import SAPAdvertisements.exeptions.UserNotFoundException;
 import SAPAdvertisements.models.Users;
 import SAPAdvertisements.repository.UsersRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +22,7 @@ public class UserService {
 
     @Autowired
     private UsersRepository usersRepository;
+
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -105,6 +109,7 @@ public class UserService {
         }
         return false;
     }
+
 
     public Users findUserById(String username) {
         return usersRepository.getUserByUsername(username);
