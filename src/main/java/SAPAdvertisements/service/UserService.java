@@ -1,6 +1,5 @@
 package SAPAdvertisements.service;
 
-import SAPAdvertisements.validator.Validations;
 import SAPAdvertisements.common.ConstantMessages;
 import SAPAdvertisements.exeptions.InvalidPropertyException;
 import SAPAdvertisements.exeptions.NonUpdateablePropertyException;
@@ -10,21 +9,23 @@ import SAPAdvertisements.models.Users;
 import SAPAdvertisements.repository.UsersRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@AllArgsConstructor
-public class UserService implements UserDetailsService {
+public class UserService {
 
-    private final static String USER_NOT_FOUND_MSG = "User with email %s not found";
 
     @Autowired
     private UsersRepository usersRepository;
+
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public UserService() {
 
@@ -46,32 +47,14 @@ public class UserService implements UserDetailsService {
     }
 
     public Users createUser(Users user) throws InvalidPropertyException, AlreadyExistsException {
-
-        if (!Validations.isValidUsername(user.getUsername())){
-            throw new InvalidPropertyException(ConstantMessages.INVALID_USERNAME_EXCEPTION);
-        }
-
         if (registeredUsername(user.getUsername())){
             throw new AlreadyExistsException(ConstantMessages.USERNAME_ALREADY_EXIST_EXCEPTIONS);
         }
 
-        if(!Validations.isValidPassword(user.getPassword())){
-            throw new InvalidPropertyException(ConstantMessages.INVALID_PASSWORD_EXCEPTION);
-        }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        if (!Validations.isValidEmail(user.getEmail())){
-            throw new InvalidPropertyException(ConstantMessages.INVALID_EMAIL_EXCEPTION);
-        }
         if (registeredEmail(user.getEmail())){
             throw new AlreadyExistsException(ConstantMessages.EMAIL_ALREADY_EXIST_EXCEPTIONS);
-        }
-
-        if (!Validations.isValidPhoneNumber(user.getPhoneNumber())) {
-            throw new InvalidPropertyException(ConstantMessages.INVALID_PHONE_NUMBER_EXCEPTION);
-        }
-
-        if (!Validations.isValidUserType(user.getUserType())) {
-            throw new InvalidPropertyException(ConstantMessages.INVALID_USER_TYPE_EXCEPTION);
         }
 
           return usersRepository.save(user);
@@ -83,30 +66,18 @@ public class UserService implements UserDetailsService {
             case "username":
                 throw new NonUpdateablePropertyException(ConstantMessages.NON_UPDATEABLE_USERNAME_EXCEPTIONS);
             case "password":
-                if(!Validations.isValidPassword(data)){
-                    throw new InvalidPropertyException(ConstantMessages.INVALID_PASSWORD_EXCEPTION);
-                }
-                user.setPassword(data);
+                user.setPassword(passwordEncoder.encode(user.getPassword()));
                 break;
             case "email":
-                if (!Validations.isValidEmail(data)){
-                    throw new InvalidPropertyException(ConstantMessages.INVALID_EMAIL_EXCEPTION);
-                }
                 if (registeredEmail(data)){
                     throw new AlreadyExistsException(ConstantMessages.EMAIL_ALREADY_EXIST_EXCEPTIONS);
                 }
                 user.setEmail(data);
                 break;
             case "phoneNumber":
-                if (!Validations.isValidPhoneNumber(data)) {
-                    throw new InvalidPropertyException(ConstantMessages.INVALID_PHONE_NUMBER_EXCEPTION);
-                }
                 user.setPhoneNumber(data);
                 break;
             case "userType":
-                if (!Validations.isValidUserType(data.toUpperCase())) {
-                    throw new InvalidPropertyException(ConstantMessages.INVALID_USER_TYPE_EXCEPTION);
-                }
                 user.setUserType(data.toUpperCase());
                 break;
         }
@@ -139,11 +110,10 @@ public class UserService implements UserDetailsService {
         return false;
     }
 
-    @Override
-    public Users loadUserByUsername(String username) throws UsernameNotFoundException {
-        return usersRepository
-                .findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException(String.format(USER_NOT_FOUND_MSG, username)));
+
+    public Users findUserById(String username) {
+        return usersRepository.getUserByUsername(username);
     }
+
 }
 

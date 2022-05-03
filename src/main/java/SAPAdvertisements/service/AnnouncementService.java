@@ -1,6 +1,5 @@
 package SAPAdvertisements.service;
 
-import SAPAdvertisements.validator.Validations;
 import SAPAdvertisements.common.ConstantMessages;
 import SAPAdvertisements.exeptions.AnnouncementNotFoundException;
 import SAPAdvertisements.exeptions.EmptyWishList;
@@ -13,7 +12,6 @@ import SAPAdvertisements.repository.AnnouncementsRepository;
 import SAPAdvertisements.repository.CategoryRepository;
 import SAPAdvertisements.repository.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -46,35 +44,15 @@ public class AnnouncementService {
     }
 
     public Announcements createAnnouncement(Announcements announcement) throws InvalidPropertyException {
-        if (!Validations.isValidAnnouncementName(announcement.getAnnouncementName())){
-           throw new InvalidPropertyException(ConstantMessages.INVALID_NAME_ANNOUNCEMENT_EXCEPTION);
-        }
-
-        if (!Validations.isValidPrice(announcement.getPrice())){
-            throw new InvalidPropertyException(ConstantMessages.INVALID_PRICE_ANNOUNCEMENT_EXCEPTION);
-        }
-
-        if (!Validations.isValidAnnouncementNumber(announcement.getAnnouncementNumber())){
-            throw new InvalidPropertyException(ConstantMessages.INVALID_ITEM_NUMBER_ANNOUNCEMENT_EXCEPTION);
-        }
-
         if (isSameAnnouncementNumber(announcement.getAnnouncementNumber())){
             throw new InvalidPropertyException(ConstantMessages.SAME_ANNOUNCEMENT_NUMBER);
         }
 
-        if (!Validations.isValidDescriptions(announcement.getDescriptions())){
-            throw new InvalidPropertyException(ConstantMessages.INVALID_DESCRIPTION_ANNOUNCEMENT_EXCEPTION);
-        }
-
-        if (!haveThisCategory(announcement.getCategoryID())){
+        if (!haveThisCategory(announcement.getCategory_id().getCategory_id())){
             throw new InvalidPropertyException(ConstantMessages.INVALID_CATEGORY_EXCEPTION);
         }
 
-        if (!Validations.isValidAnnouncementStatus(announcement.getStatus())){
-            throw new InvalidPropertyException(ConstantMessages.INVALID_STATUS_EXCEPTION);
-        }
-
-        if (!haveThisUserById(announcement.getUserID())){
+        if (!haveThisUserById(announcement.getUser_id().getUser_id())){
             throw new InvalidPropertyException(ConstantMessages.INVALID_USERNAME_EXCEPTION);
         }
 
@@ -86,34 +64,17 @@ public class AnnouncementService {
         Announcements announcement = readAnnouncement(announcementNumber);
         switch (field){
             case "announcementName":
-                if (!Validations.isValidAnnouncementName(data)){
-                    throw new InvalidPropertyException(ConstantMessages.INVALID_NAME_ANNOUNCEMENT_EXCEPTION);
-                }
                 announcement.setAnnouncementName(data);
                 break;
             case "announcementNumber":
                 throw new NonUpdateablePropertyException(ConstantMessages.NON_UPDATEABLE_ANNOUNCEMENT_NUMBER_EXCEPTIONS);
             case "price":
-                try {
-                    if (!Validations.isValidPrice(Double.parseDouble(data))){
-                        throw new InvalidPropertyException(ConstantMessages.INVALID_PRICE_ANNOUNCEMENT_EXCEPTION);
-                    }
-                }catch (NumberFormatException e){
-                    throw new InvalidPropertyException(ConstantMessages.INVALID_PRICE_ANNOUNCEMENT_EXCEPTION);
-                }
-
                 announcement.setPrice(Double.parseDouble(data));
                 break;
             case "descriptions":
-                if (!Validations.isValidDescriptions(data)){
-                    throw new InvalidPropertyException(ConstantMessages.INVALID_DESCRIPTION_ANNOUNCEMENT_EXCEPTION);
-                }
                 announcement.setDescriptions(data);
                 break;
             case "status":
-                if (!Validations.isValidAnnouncementStatus(data)){
-                    throw new InvalidPropertyException(ConstantMessages.INVALID_STATUS_EXCEPTION);
-                }
                 announcement.setStatus(data);
                 break;
             case "categoryID":
@@ -125,7 +86,8 @@ public class AnnouncementService {
                     throw new InvalidPropertyException(ConstantMessages.INVALID_CATEGORY_EXCEPTION);
                 }
 
-                announcement.setCategoryID(Integer.parseInt(data));
+                announcement.setCategory_id(new Categories(Integer.parseInt(data)));
+
                 break;
             case "userID":
                 try {
@@ -136,15 +98,16 @@ public class AnnouncementService {
                     throw new InvalidPropertyException(ConstantMessages.INVALID_CATEGORY_EXCEPTION);
                 }
 
-                announcement.setUserID(Integer.parseInt(data));
+                announcement.setUser_id(new Users(Integer.parseInt(data)));
+
                 break;
         }
         announcementsRepository.save(announcement);
         return announcement;
     }
 
-    public void deleteAnnouncement(Announcements announcements) {
-        announcementsRepository.deleteById(announcements.getAnnouncement_id());
+    public void deleteAnnouncement(String announcementNumber) {
+        announcementsRepository.deleteById(announcementsRepository.getAnnouncementsByNumber(announcementNumber).getAnnouncement_id());
     }
 
     public Announcements inactiveAnnouncement(String announcementNumber) throws AnnouncementNotFoundException, InvalidPropertyException, NonUpdateablePropertyException {
@@ -162,8 +125,8 @@ public class AnnouncementService {
     }
 
     public List<Announcements> getByStatusAndTimePeriod(String status, String startTime, String endTime) throws ParseException, EmptyWishList {
-        Date startDate = new SimpleDateFormat("dd.MM.yyyy").parse(startTime);
-        Date endDate = new SimpleDateFormat("dd.MM.yyyy").parse(endTime);
+        Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse(startTime);
+        Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse(endTime);
         List<String> listStatus = List.of(status.split(","));
         List<Announcements> announcements = announcementsRepository.getByStatusAndTimePeriod(listStatus, startDate, endDate);
 
@@ -174,8 +137,8 @@ public class AnnouncementService {
     }
 
     public List<Announcements>  getByDateCreated(String startTime, String endTime) throws EmptyWishList, ParseException {
-        Date startDate = new SimpleDateFormat("dd.MM.yyyy").parse(startTime);
-        Date endDate = new SimpleDateFormat("dd.MM.yyyy").parse(endTime);
+        Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse(startTime);
+        Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse(endTime);
 
         List<Announcements> announcements = announcementsRepository.getByDateCreated(startDate, endDate);
 
@@ -226,6 +189,8 @@ public class AnnouncementService {
         return false;
     }
 
+    public Announcements findAnnouncementsIdNumber(String announcementNumber) {
+        return announcementsRepository.getAnnouncementsByNumber(announcementNumber);
 
-
+    }
 }

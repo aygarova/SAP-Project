@@ -1,9 +1,5 @@
 package SAPAdvertisements.models;
 
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
 import javax.persistence.*;
 import java.util.*;
 
@@ -12,26 +8,29 @@ import java.util.*;
 public class Users implements UserDetails {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int user_id;
 
-    @Column(name = "username")
+    @Column(name = "username",nullable = false, unique = true)
     private String username;
 
-    @Column(name = "password")
+    @Column(name = "password",nullable = false)
     private String password;
 
-    @Column(name = "phonenumber")
+    @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
-    @Column(name = "email")
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "usertype")
+    @Column(name = "usertype", nullable = false)
     private String userType;
 
-    private Boolean locked;
-    private Boolean enabled;
+    @OneToMany(mappedBy = "user_id", fetch = FetchType.EAGER)
+    private Set<Announcements> announcements;
+
+    @OneToOne(mappedBy = "userID")
+    private WishList wishList;
 
     public Users() {}
 
@@ -47,12 +46,10 @@ public class Users implements UserDetails {
         this.enabled = enabled;
     }
 
-    public List<String> getRoleList(){
-        if(this.userType.length() > 0){
-            return Arrays.asList(this.userType.split(","));
-        }
-        return new ArrayList<>();
+    public Users(int user_id) {
+        this.user_id = user_id;
     }
+
     public int getUser_id() {
         return user_id;
     }
@@ -125,6 +122,14 @@ public class Users implements UserDetails {
 
     public void setUserType(String userType) {
         this.userType = userType;
+    }
+
+    public Set<Announcements> getAnnouncements() {
+        return announcements;
+    }
+
+    public void setAnnouncements(Set<Announcements> announcements) {
+        this.announcements = announcements;
     }
 
     @Override
