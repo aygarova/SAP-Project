@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 public interface AnnouncementsRepository extends JpaRepository<Announcements, Integer> {
-    List<Announcements> findByAnnouncementNumber(String announcementNumber);
+    Announcements findByAnnouncementNumber(String announcementNumber);
 
     // find with status and between datefrom and dateto
     @Query(value = "SELECT * FROM announcements a WHERE status IN (:status) and a.activate_from >= :start and a.activate_to <= :end", nativeQuery = true)

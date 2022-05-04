@@ -9,26 +9,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 public class CategoryService {
-
-    @Autowired
     private CategoryRepository categoryRepository;
 
-    public Categories readCategory(String category) throws CategoryNotFoundException {
-        Categories categoryToReturn = null;
-        List<Categories> categoriesFromDB = categoryRepository.findAll();
-        for (Categories c : categoriesFromDB) {
-            if (c.getCategoryName().equals(category)){
-                categoryToReturn = c;
-            }
-        }
-        if (categoryToReturn == null){
-            throw new CategoryNotFoundException(ConstantMessages.CATEGORY_NOT_FOUND_EXCEPTION);
-        }
-
-        return categoryToReturn;
+    @Autowired
+    public CategoryService(CategoryRepository categoryRepository) {
+        this.categoryRepository = categoryRepository;
     }
 
-    public List<Categories> readAllCategories() throws CategoryNotFoundException, EmptyWishList {
+    public Categories readCategory(String category) throws CategoryNotFoundException {
+       Categories categoriesFromDB = categoryRepository.findByCategoryName(category);
+        if (categoriesFromDB == null){
+            throw new CategoryNotFoundException(ConstantMessages.CATEGORY_NOT_FOUND_EXCEPTION);
+        }
+        return categoriesFromDB;
+    }
+
+    public List<Categories> readAllCategories() throws EmptyWishList {
         List<Categories> allCategoriesFromDB = categoryRepository.findAll();
         if (allCategoriesFromDB.size() == 0){
             throw new EmptyWishList(ConstantMessages.LIST_IS_EMPTY);
@@ -45,7 +41,7 @@ public class CategoryService {
 
     }
 
-    public Categories updateCategoryData(String category, String data) throws  InvalidPropertyException, AlreadyExistsException, NonUpdateablePropertyException, CategoryNotFoundException {
+    public Categories updateCategoryData(String category, String data) throws AlreadyExistsException, CategoryNotFoundException {
         Categories categories = readCategory(category);
         if (haveThisCategory(data)){
             throw new AlreadyExistsException(ConstantMessages.CATEGORY_ALREADY_EXIST_EXCEPTIONS);
@@ -57,11 +53,9 @@ public class CategoryService {
 
 
     public boolean haveThisCategory(String name){
-        List<Categories> categoryFromDB = categoryRepository.findByCategoryName(name);
-        for (Categories c:categoryFromDB) {
-            if (c.getCategoryName().equals(name)){
+        Categories categoryFromDB = categoryRepository.findByCategoryName(name);
+        if (categoryFromDB.getCategoryName().equals(name)){
                 return true;
-            }
         }
         return false;
     }

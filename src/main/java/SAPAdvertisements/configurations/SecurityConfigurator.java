@@ -1,6 +1,9 @@
 package SAPAdvertisements.configurations;
 
-import SAPAdvertisements.service.impl.UserDetailsServiceImpl;
+import SAPAdvertisements.models.Users;
+import SAPAdvertisements.repository.UsersRepository;
+import SAPAdvertisements.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -14,12 +17,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfigurator extends WebSecurityConfigurerAdapter {
 
-    private final UserDetailsServiceImpl userDetailsService;
+    private final UserService userService;
     private final PasswordEncoder bCryptPasswordEncoder;
+    private final UsersRepository usersRepository;
 
-    public SecurityConfigurator(UserDetailsServiceImpl userDetailsService, PasswordEncoder bCryptPasswordEncoder) {
-        this.userDetailsService = userDetailsService;
+    @Autowired
+    public SecurityConfigurator(UserService userService, PasswordEncoder bCryptPasswordEncoder, UsersRepository usersRepository) {
+        this.userService = userService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.usersRepository = usersRepository;
     }
 
     @Override
@@ -37,8 +43,7 @@ public class SecurityConfigurator extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth
-                .userDetailsService(userDetailsService)
+                .userDetailsService(userService)
                 .passwordEncoder(bCryptPasswordEncoder);
     }
-
 }

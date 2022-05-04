@@ -1,5 +1,9 @@
 package SAPAdvertisements.configurations;
 
+import SAPAdvertisements.repository.AnnouncementsRepository;
+import SAPAdvertisements.repository.CategoryRepository;
+import SAPAdvertisements.repository.UsersRepository;
+import SAPAdvertisements.repository.WishListRepository;
 import SAPAdvertisements.service.AnnouncementService;
 import SAPAdvertisements.service.CategoryService;
 import SAPAdvertisements.service.UserService;
@@ -13,8 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 public class BeanConfigurator {
     @Bean
-    public UserService userService(){
-        return new UserService();
+    public UserService userService(UsersRepository usersRepository, PasswordEncoder passwordEncoder){
+        return new UserService(usersRepository, passwordEncoder);
     }
 
     @Bean
@@ -23,18 +27,18 @@ public class BeanConfigurator {
     }
 
     @Bean
-    public AnnouncementService announcementService(){
-        return new AnnouncementService();
+    public AnnouncementService announcementService(AnnouncementsRepository announcementsRepository, CategoryRepository categoryRepository, UsersRepository usersRepository){
+        return new AnnouncementService(announcementsRepository,categoryRepository,usersRepository);
     }
 
     @Bean
-    public CategoryService categoryService(){
-        return new CategoryService();
+    public CategoryService categoryService(CategoryRepository categoryRepository){
+        return new CategoryService(categoryRepository);
     }
 
     @Bean
-    public WishListService wishListService(){
-        return new WishListService();
+    public WishListService wishListService(WishListRepository wishListRepository, UsersRepository usersRepository, AnnouncementsRepository announcementsRepository){
+        return new WishListService(wishListRepository, usersRepository, announcementsRepository);
     }
 
     @Bean

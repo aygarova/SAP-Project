@@ -1,52 +1,44 @@
 package SAPAdvertisements.service;
 
 import SAPAdvertisements.common.ConstantMessages;
-import SAPAdvertisements.exeptions.InvalidPropertyException;
 import SAPAdvertisements.exeptions.NonUpdateablePropertyException;
 import SAPAdvertisements.exeptions.AlreadyExistsException;
 import SAPAdvertisements.exeptions.UserNotFoundException;
 import SAPAdvertisements.models.Users;
 import SAPAdvertisements.repository.UsersRepository;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Collections;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
-
-    @Autowired
-    private UsersRepository usersRepository;
-
+    private final UsersRepository usersRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    public UserService() {
-
+    public UserService(UsersRepository usersRepository, PasswordEncoder passwordEncoder) {
+        this.usersRepository = usersRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public Users readUser(String username) throws UserNotFoundException {
-        Users userToReturn = null;
-        List<Users> usersFromDB = usersRepository.findByUsername(username);
-        for (Users u : usersFromDB) {
-            if (u.getUsername().equals(username)){
-                userToReturn = u;
-            }
-        }
-        if (userToReturn == null){
+        Users usersFromDB = usersRepository.findByUsername(username);
+        if (usersFromDB == null){
             throw new UserNotFoundException(ConstantMessages.USER_NOT_FOUND_EXCEPTION);
         }
 
-        return userToReturn;
+        return usersFromDB;
     }
 
-    public Users createUser(Users user) throws InvalidPropertyException, AlreadyExistsException {
+    public Users createUser(Users user) throws AlreadyExistsException {
         if (registeredUsername(user.getUsername())){
             throw new AlreadyExistsException(ConstantMessages.USERNAME_ALREADY_EXIST_EXCEPTIONS);
         }
@@ -60,7 +52,7 @@ public class UserService {
           return usersRepository.save(user);
     }
 
-    public Users updateUserData(String username, String field, String data) throws UserNotFoundException, InvalidPropertyException, AlreadyExistsException, NonUpdateablePropertyException {
+    public Users updateUserData(String username, String field, String data) throws UserNotFoundException, AlreadyExistsException, NonUpdateablePropertyException {
         Users user = readUser(username);
         switch (field){
             case "username":
@@ -91,29 +83,33 @@ public class UserService {
 
 
     public boolean registeredUsername(String name){
-        List<Users> usersFromFile = usersRepository.findByUsername(name);
-        for (Users u:usersFromFile) {
-            if (u.getUsername().equals(name)){
+        Users usersFromFile = usersRepository.findByUsername(name);
+            if (usersFromFile.getUsername().equals(name)){
                 return true;
-            }
         }
         return false;
     }
 
     public boolean registeredEmail(String email){
-        List<Users> usersFromFile = usersRepository.findAll();
-        for (Users u:usersFromFile) {
-            if (u.getEmail().equals(email)){
+        Users usersFromFile = usersRepository.findByEmail(email);
+            if (usersFromFile.getEmail().equals(email)){
                 return true;
-            }
         }
         return false;
     }
 
-
     public Users findUserById(String username) {
-        return usersRepository.getUserByUsername(username);
+        return usersRepository.findByUsername(username);
     }
 
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Users user = usersRepository.findByUsername(username);
+
+        return new User(user.getUsername(),
+                user.getPassword(),
+                Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getUserType())));
+    }
 }
 

@@ -20,27 +20,23 @@ import java.util.List;
 
 public class AnnouncementService {
 
-    @Autowired
     private AnnouncementsRepository announcementsRepository;
-
-    @Autowired
     private CategoryRepository categoryRepository;
-
-    @Autowired
     private UsersRepository usersRepository;
 
+    @Autowired
+    public AnnouncementService(AnnouncementsRepository announcementsRepository, CategoryRepository categoryRepository, UsersRepository usersRepository) {
+        this.announcementsRepository = announcementsRepository;
+        this.categoryRepository = categoryRepository;
+        this.usersRepository = usersRepository;
+    }
+
     public Announcements readAnnouncement(String announcementNumber) throws AnnouncementNotFoundException {
-        Announcements announcementToReturn = null;
-        List<Announcements> announcementsFromDB = announcementsRepository.findAll();
-        for (Announcements a : announcementsFromDB) {
-            if (a.getAnnouncementNumber().equals(announcementNumber)){
-                announcementToReturn = a;
-            }
-        }
-        if (announcementToReturn == null){
+        Announcements announcementsFromDB = announcementsRepository.findByAnnouncementNumber(announcementNumber);
+        if (announcementNumber == null){
             throw new AnnouncementNotFoundException(ConstantMessages.ANNOUNCEMENT_NOT_FOUND_EXCEPTION);
         }
-        return announcementToReturn;
+        return announcementsFromDB;
     }
 
     public Announcements createAnnouncement(Announcements announcement) throws InvalidPropertyException {
