@@ -20,63 +20,48 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Converters  {
-    private final AnnouncementService announcementService;
-    private final CategoryService categoryService;
-    private final ModelMapper modelMapper;
-    private final UserService userService;
-    private final WishListService wishListService;
+    public static ModelMapper modelMapper = new ModelMapper();;
 
-    @Autowired
-    public Converters(AnnouncementService announcementService, CategoryService categoryService, ModelMapper modelMapper, UserService userService, WishListService wishListService) {
-        this.announcementService = announcementService;
-        this.categoryService = categoryService;
-        this.modelMapper = modelMapper;
-        this.userService = userService;
-        this.wishListService = wishListService;
-    }
-
-
-    protected AnnouncementDto convertToAnnouncementsDto(Announcements announcements) throws UserNotFoundException {
+    public static AnnouncementDto convertToAnnouncementsDto(Announcements announcements, UserService userService) throws UserNotFoundException {
         AnnouncementDto announcementDto =  modelMapper.map(announcements,AnnouncementDto.class);
         announcementDto.setUsername(userService.readUser(announcements.getUser_id().getUsername()).getUsername());
         return announcementDto;
     }
 
-    protected Announcements convertToAnnouncementsEntity(AnnouncementDto announcementDto) {
+    public static Announcements convertToAnnouncementsEntity(AnnouncementDto announcementDto, UserService userService,CategoryService categoryService) {
         Announcements announcements = modelMapper.map(announcementDto,Announcements.class);
         announcements.setCategory_id(categoryService.findCategoryId(announcementDto.getCategoryName()));
         announcements.setUser_id(userService.findUserById(announcementDto.getUsername()));
         return announcements;
     }
 
-    protected List<AnnouncementDto> convertToAnnouncementsListDto(List<Announcements> announcements) throws UserNotFoundException {
+    public static List<AnnouncementDto> convertToAnnouncementsListDto(List<Announcements> announcements, UserService userService) throws UserNotFoundException {
         List<AnnouncementDto> announcementDtos = new ArrayList<>();
         for (Announcements a: announcements) {
-            announcementDtos.add(convertToAnnouncementsDto(a));
+            announcementDtos.add(convertToAnnouncementsDto(a,userService));
         }
         return announcementDtos;
     }
-
-    protected Categories convertToCategoryEntity(CategoryDto categoryDto) {
-        return modelMapper.map(categoryDto,Categories.class);
-    }
-
-    protected UserDto convertToUserDto(Users users) {
+    public static UserDto convertToUserDto(Users users) {
         return modelMapper.map(users,UserDto.class);
     }
 
-    protected Users convertToUserEntity(UserDto userDto) {
+    public static Users convertToUserEntity(UserDto userDto) {
         return modelMapper.map(userDto,Users.class);
     }
 
-    protected WishListDto convertToWishListDto(WishList wishList)  {
+    public static Categories convertToCategoryEntity(CategoryDto categoryDto) {
+        return modelMapper.map(categoryDto,Categories.class);
+    }
+
+    public static WishListDto convertToWishListDto(WishList wishList)  {
         WishListDto wishListDto = new WishListDto();
         wishListDto.setUsername(wishList.getUserID().getUsername());
         wishListDto.setAnnouncementNumber(wishList.getAnnouncementID().getAnnouncementNumber());
         return wishListDto;
     }
 
-    protected WishList convertToWishListEntity(WishListDto wishListDto) {
+    public static WishList convertToWishListEntity(WishListDto wishListDto, UserService userService, AnnouncementService announcementService) {
         WishList wishList = new WishList();
         wishList.setUserID(userService.findUserById(wishListDto.getUsername()));
         wishList.setAnnouncementID(announcementService.findAnnouncementsIdNumber(wishListDto.getAnnouncementNumber()));

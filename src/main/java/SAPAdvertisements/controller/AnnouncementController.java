@@ -7,7 +7,7 @@ import SAPAdvertisements.models.Announcements;
 import SAPAdvertisements.service.AnnouncementService;
 import SAPAdvertisements.service.CategoryService;
 import SAPAdvertisements.service.UserService;
-import org.modelmapper.ModelMapper;
+import SAPAdvertisements.util.Converters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -28,29 +27,28 @@ import static org.springframework.http.ResponseEntity.status;
 public class AnnouncementController {
 
     private final AnnouncementService announcementService;
-    private final ModelMapper modelMapper;
-    private final UserService userService;
     private final CategoryService categoryService;
+    private final UserService userService;
+
 
     @Autowired
-    public AnnouncementController(AnnouncementService announcementService, ModelMapper modelMapper, UserService userService, CategoryService categoryService) {
+    public AnnouncementController(AnnouncementService announcementService, CategoryService categoryService, UserService userService) {
         this.announcementService = announcementService;
-        this.modelMapper = modelMapper;
-        this.userService = userService;
         this.categoryService = categoryService;
+        this.userService = userService;
     }
 
     @GetMapping(value = "/{announcementNumber}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public ResponseEntity<AnnouncementDto> getAnnouncement(@PathVariable("announcementNumber") String announcementNumber) throws AnnouncementNotFoundException, UserNotFoundException {
-            return status(OK).body(convertToAnnouncementsDto(announcementService.readAnnouncement(announcementNumber)));
+            return status(OK).body(Converters.convertToAnnouncementsDto(announcementService.readAnnouncement(announcementNumber),userService));
 
     }
 
     @PostMapping
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Announcements> createAnnouncement(@Valid @RequestBody AnnouncementDto announcementDto) throws InvalidPropertyException, NullPointerException {
-           return status(CREATED).body(announcementService.createAnnouncement(convertToAnnouncementsEntity(announcementDto)));
+           return status(CREATED).body(announcementService.createAnnouncement(Converters.convertToAnnouncementsEntity(announcementDto, userService,categoryService)));
     }
 
 
@@ -80,7 +78,7 @@ public class AnnouncementController {
             if (status.toUpperCase().contains("INACTIVE") && !isAdmin) {
                 return new ResponseEntity(ConstantMessages.ALLOWED_FOR_ADMIN + ConstantMessages.USER_WHICH_DO_NOT_RIGHT + username, FORBIDDEN);
             }
-            return status(OK).body(convertToAnnouncementsListDto(announcementService.getByStatus(status)));
+            return status(OK).body(Converters.convertToAnnouncementsListDto(announcementService.getByStatus(status),userService));
     }
 
     @GetMapping(value = "/filter/{status}/{startTime}/{endTime}")
@@ -90,40 +88,18 @@ public class AnnouncementController {
             if (status.toUpperCase().contains("INACTIVE") && !isAdmin) {
                 return new ResponseEntity(ConstantMessages.ALLOWED_FOR_ADMIN + ConstantMessages.USER_WHICH_DO_NOT_RIGHT + username, FORBIDDEN);
             }
-        return status(OK).body(convertToAnnouncementsListDto(announcementService.getByStatusAndTimePeriod(status,startTime,endTime)));
+        return status(OK).body(Converters.convertToAnnouncementsListDto(announcementService.getByStatusAndTimePeriod(status,startTime,endTime),userService));
 
     }
 
     @GetMapping(value = "/filter/{startTime}/{endTime}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public ResponseEntity<List<AnnouncementDto>> getByDateCreated(@PathVariable("startTime") String startTime, @PathVariable("endTime") String endTime) throws EmptyWishList, ParseException, UserNotFoundException {
-        return status(OK).body(convertToAnnouncementsListDto(announcementService.getByDateCreated(startTime,endTime)));
+        return status(OK).body(Converters.convertToAnnouncementsListDto(announcementService.getByDateCreated(startTime,endTime),userService));
     }
     @GetMapping(value = "/fav")
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public ResponseEntity<List<AnnouncementDto>> findAllFavorites() throws EmptyWishList, UserNotFoundException {
-        return status(OK).body(convertToAnnouncementsListDto(announcementService.findAllFavorites()));
+        return status(OK).body(Converters.convertToAnnouncementsListDto(announcementService.findAllFavorites(),userService));
     }
-
-    private AnnouncementDto convertToAnnouncementsDto(Announcements announcements) throws UserNotFoundException {
-        AnnouncementDto announcementDto =  modelMapper.map(announcements,AnnouncementDto.class);
-        announcementDto.setUsername(userService.readUser(announcements.getUser_id().getUsername()).getUsername());
-        return announcementDto;
-    }
-
-    private Announcements convertToAnnouncementsEntity(AnnouncementDto announcementDto) {
-        Announcements announcements = modelMapper.map(announcementDto,Announcements.class);
-        announcements.setCategory_id(categoryService.findCategoryId(announcementDto.getCategoryName()));
-        announcements.setUser_id(userService.findUserById(announcementDto.getUsername()));
-        return announcements;
-    }
-
-    private List<AnnouncementDto> convertToAnnouncementsListDto(List<Announcements> announcements) throws UserNotFoundException {
-        List<AnnouncementDto> announcementDtos = new ArrayList<>();
-        for (Announcements a: announcements) {
-            announcementDtos.add(convertToAnnouncementsDto(a));
-        }
-        return announcementDtos;
-    }
-
 }

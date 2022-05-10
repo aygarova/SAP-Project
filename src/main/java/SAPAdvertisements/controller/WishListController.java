@@ -9,7 +9,7 @@ import SAPAdvertisements.models.WishList;
 import SAPAdvertisements.service.AnnouncementService;
 import SAPAdvertisements.service.UserService;
 import SAPAdvertisements.service.WishListService;
-import org.modelmapper.ModelMapper;
+import SAPAdvertisements.util.Converters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,17 +27,15 @@ import static org.springframework.http.ResponseEntity.status;
 public class WishListController {
 
     private final WishListService wishListService;
-    private final ModelMapper modelMapper;
-    private final UserService userService;
     private final AnnouncementService announcementService;
+    private final UserService userService;
+
 
     @Autowired
-
-    public WishListController(WishListService wishListService, ModelMapper modelMapper, UserService userService, AnnouncementService announcementService) {
+    public WishListController(WishListService wishListService, AnnouncementService announcementService, UserService userService) {
         this.wishListService = wishListService;
-        this.modelMapper = modelMapper;
-        this.userService = userService;
         this.announcementService = announcementService;
+        this.userService = userService;
     }
 
     @GetMapping(value = "/{userID}")
@@ -46,7 +44,7 @@ public class WishListController {
         List<WishList> wishList= wishListService.readWishList(userID);
         List<WishListDto> wishListDtos = new ArrayList<>();
         for (WishList w: wishList) {
-            wishListDtos.add(convertToWishListDto(w));
+            wishListDtos.add(Converters.convertToWishListDto(w));
         }
             return status(OK).body(wishListDtos);
     }
@@ -54,7 +52,7 @@ public class WishListController {
     @PostMapping
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<WishList> addToWishList(@Valid @RequestBody WishListDto wishListDto) throws InvalidPropertyException {
-            return status(CREATED).body(wishListService.addToWishList(convertToWishListEntity(wishListDto)));
+            return status(CREATED).body(wishListService.addToWishList(Converters.convertToWishListEntity(wishListDto,userService,announcementService)));
     }
 
     @DeleteMapping(value = "{wishlist_id}")
@@ -62,19 +60,5 @@ public class WishListController {
     public ResponseEntity deleteFromWishList(@PathVariable("wishlist_id") int wishListID) {
         wishListService.deleteAnnouncementFromWishList(wishListID);
         return status(NO_CONTENT).build();
-    }
-
-    private WishListDto convertToWishListDto(WishList wishList)  {
-        WishListDto wishListDto = new WishListDto();
-        wishListDto.setUsername(wishList.getUserID().getUsername());
-        wishListDto.setAnnouncementNumber(wishList.getAnnouncementID().getAnnouncementNumber());
-        return wishListDto;
-    }
-
-    private WishList convertToWishListEntity(WishListDto wishListDto) {
-        WishList wishList = new WishList();
-        wishList.setUserID(userService.findUserById(wishListDto.getUsername()));
-        wishList.setAnnouncementID(announcementService.findAnnouncementsIdNumber(wishListDto.getAnnouncementNumber()));
-        return wishList;
     }
 }
