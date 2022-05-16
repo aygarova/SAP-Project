@@ -35,7 +35,7 @@ public class AnnouncementDto {
     private String  dateTo;
 
     @NotBlank(message = "Status of announcement can't be empty")
-    @EnumValidator(enumClass = AnnouncementStatus.class, message = "Status must be Active or Inactive")
+    @EnumValidator(enumClass = AnnouncementStatus.class, message = "Status must be ACTIVE or INACTIVE")
     private String status;
 
     public AnnouncementDto() {

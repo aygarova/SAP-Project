@@ -1,6 +1,7 @@
 package SAPAdvertisements.service;
 
 import SAPAdvertisements.common.ConstantMessages;
+import SAPAdvertisements.enums.AnnouncementStatus;
 import SAPAdvertisements.exeptions.AnnouncementNotFoundException;
 import SAPAdvertisements.exeptions.EmptyWishList;
 import SAPAdvertisements.exeptions.InvalidPropertyException;
@@ -60,17 +61,30 @@ public class AnnouncementService {
         Announcements announcement = readAnnouncement(announcementNumber);
         switch (field){
             case "announcementName":
+                if (data.isEmpty()){
+                    throw new InvalidPropertyException(ConstantMessages.INVALID_NAME_ANNOUNCEMENT_EXCEPTION);
+                }
                 announcement.setAnnouncementName(data);
                 break;
             case "announcementNumber":
                 throw new NonUpdateablePropertyException(ConstantMessages.NON_UPDATEABLE_ANNOUNCEMENT_NUMBER_EXCEPTIONS);
             case "price":
-                announcement.setPrice(Double.parseDouble(data));
+                try {
+                    announcement.setPrice(Double.parseDouble(data));
+                }catch (NumberFormatException e){
+                    throw new InvalidPropertyException(ConstantMessages.INVALID_PRICE_ANNOUNCEMENT_EXCEPTION);
+                }
                 break;
             case "descriptions":
+                if (data.isEmpty()){
+                    throw new InvalidPropertyException(ConstantMessages.INVALID_DESCRIPTION_ANNOUNCEMENT_EXCEPTION);
+                }
                 announcement.setDescriptions(data);
                 break;
             case "status":
+                if (!(data.equals(AnnouncementStatus.ACTIVE.name()) || data.equals(AnnouncementStatus.INACTIVE.name()))){
+                    throw new InvalidPropertyException(ConstantMessages.INVALID_STATUS_EXCEPTION);
+                }
                 announcement.setStatus(data);
                 break;
             case "categoryID":

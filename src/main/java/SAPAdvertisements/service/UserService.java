@@ -7,18 +7,14 @@ import SAPAdvertisements.exeptions.UserNotFoundException;
 import SAPAdvertisements.models.Users;
 import SAPAdvertisements.repository.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
+import java.util.List;
+
 
 @Service
-public class UserService implements UserDetailsService {
+public class UserService {
 
     private final UsersRepository usersRepository;
     private final PasswordEncoder passwordEncoder;
@@ -83,33 +79,27 @@ public class UserService implements UserDetailsService {
 
 
     public boolean registeredUsername(String name){
-        Users usersFromFile = usersRepository.findByUsername(name);
-            if (usersFromFile.getUsername().equals(name)){
+        List<Users> usersFromFile = usersRepository.getUserByUsername(name);
+        for (Users u:usersFromFile) {
+            if (u.getUsername().equals(name)){
                 return true;
+            }
         }
         return false;
     }
 
     public boolean registeredEmail(String email){
-        Users usersFromFile = usersRepository.findByEmail(email);
-            if (usersFromFile.getEmail().equals(email)){
+        List<Users> usersFromFile = usersRepository.findAll();
+        for (Users u:usersFromFile) {
+            if (u.getEmail().equals(email)){
                 return true;
+            }
         }
         return false;
     }
 
     public Users findUserById(String username) {
         return usersRepository.findByUsername(username);
-    }
-
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Users user = usersRepository.findByUsername(username);
-
-        return new User(user.getUsername(),
-                user.getPassword(),
-                Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getUserType())));
     }
 }
 
