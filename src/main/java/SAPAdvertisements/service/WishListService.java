@@ -16,15 +16,16 @@ import java.util.List;
 
 public class WishListService {
 
-    @Autowired
     private WishListRepository wishListRepository;
-
-    @Autowired
     private UsersRepository usersRepository;
-
-    @Autowired
     private AnnouncementsRepository announcementsRepository;
 
+    @Autowired
+    public WishListService(WishListRepository wishListRepository, UsersRepository usersRepository, AnnouncementsRepository announcementsRepository) {
+        this.wishListRepository = wishListRepository;
+        this.usersRepository = usersRepository;
+        this.announcementsRepository = announcementsRepository;
+    }
 
     public List<WishList> readWishList(int userID) throws EmptyWishList, UserNotFoundException {
         List<WishList> allAnnouncementsFromWishListFromDB = wishListRepository.findByUserID(userID);

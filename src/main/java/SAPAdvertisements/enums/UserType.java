@@ -1,7 +1,7 @@
 package SAPAdvertisements.enums;
 
 public enum UserType {
-    ADMINISTRATOR("ADMIN"),
+    ADMIN("ADMIN"),
     USER("USER");
 
     private final String type;

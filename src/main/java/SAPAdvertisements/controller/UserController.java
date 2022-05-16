@@ -7,7 +7,7 @@ import SAPAdvertisements.exeptions.AlreadyExistsException;
 import SAPAdvertisements.exeptions.UserNotFoundException;
 import SAPAdvertisements.models.Users;
 import SAPAdvertisements.service.UserService;
-import org.modelmapper.ModelMapper;
+import SAPAdvertisements.util.Converters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,24 +23,22 @@ import static org.springframework.http.ResponseEntity.status;
 public class UserController {
 
     private final UserService userService;
-    private final ModelMapper modelMapper;
 
     @Autowired
-    public UserController(UserService userService, ModelMapper modelMapper) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.modelMapper = modelMapper;
     }
 
     @GetMapping(value = "/{username}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDto> getUser(@PathVariable("username") String username) throws UserNotFoundException {
-            return status(OK).body(convertToUserDto(userService.readUser(username)));
+            return status(OK).body(Converters.convertToUserDto(userService.readUser(username)));
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public ResponseEntity<Users> createUser(@Valid @RequestBody UserDto userDto) throws AlreadyExistsException, InvalidPropertyException {
-            return status(CREATED).body(userService.createUser(convertToUserEntity(userDto)));
+            return status(CREATED).body(userService.createUser(Converters.convertToUserEntity(userDto)));
     }
 
     @PatchMapping(value = "/{username}/{field}")
@@ -54,13 +52,5 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@RequestBody Users user) {
         userService.deleteUser(user);
         return status(NO_CONTENT).build();
-    }
-
-    private UserDto convertToUserDto(Users users) {
-        return modelMapper.map(users,UserDto.class);
-    }
-
-    private Users convertToUserEntity(UserDto userDto) {
-        return modelMapper.map(userDto,Users.class);
     }
 }

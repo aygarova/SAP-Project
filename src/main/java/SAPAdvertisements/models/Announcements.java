@@ -47,7 +47,7 @@ public class  Announcements {
     public Announcements() {
     }
 
-    public Announcements(int announcement_id, String announcementName, double price, String announcementNumber, String descriptions, LocalDate dateFrom, LocalDate dateTo, String status, Categories category_id, Users user_id, Set<WishList> wishLists) {
+    public Announcements(int announcement_id, String announcementName, double price, String announcementNumber, String descriptions, LocalDate dateFrom, LocalDate dateTo, String status) {
         this.announcement_id = announcement_id;
         this.announcementName = announcementName;
         this.price = price;
@@ -56,9 +56,6 @@ public class  Announcements {
         this.dateFrom = dateFrom;
         this.dateTo = dateTo;
         this.status = status;
-        this.category_id = category_id;
-        this.user_id = user_id;
-        this.wishLists = wishLists;
     }
 
     public Announcements(int announcement_id) {
@@ -125,14 +122,6 @@ public class  Announcements {
         this.user_id = user_id;
     }
 
-    public Set<WishList> getWishLists() {
-        return wishLists;
-    }
-
-    public void setWishLists(Set<WishList> wishLists) {
-        this.wishLists = wishLists;
-    }
-
     public LocalDate getDateFrom() {
         return dateFrom;
     }
@@ -158,18 +147,18 @@ public class  Announcements {
     }
 
 
-    @Override
-    public String toString() {
-        return "Announcement ID = " + announcement_id +
-                "Announcement name = " + announcementName +
-                ", price = " + price +
-                ", announcementNumber = " + announcementNumber +
-                ", descriptions = " + descriptions +
-                ", category_id = " + category_id +
-                ", user_id = " + user_id +
-                ", dateFrom = " + dateFrom +
-                ", dateTo = " + dateTo +
-                ", status = " + status ;
-    }
+//    @Override
+//    public String toString() {
+//        return "Announcement ID = " + announcement_id +
+//                "Announcement name = " + announcementName +
+//                ", price = " + price +
+//                ", announcementNumber = " + announcementNumber +
+//                ", descriptions = " + descriptions +
+//                ", category_id = " + category_id +
+//                ", user_id = " + user_id +
+//                ", dateFrom = " + dateFrom +
+//                ", dateTo = " + dateTo +
+//                ", status = " + status ;
+//    }
 
 }

@@ -1,6 +1,7 @@
 package SAPAdvertisements.service;
 
 import SAPAdvertisements.common.ConstantMessages;
+import SAPAdvertisements.enums.AnnouncementStatus;
 import SAPAdvertisements.exeptions.AnnouncementNotFoundException;
 import SAPAdvertisements.exeptions.EmptyWishList;
 import SAPAdvertisements.exeptions.InvalidPropertyException;
@@ -20,27 +21,23 @@ import java.util.List;
 
 public class AnnouncementService {
 
-    @Autowired
     private AnnouncementsRepository announcementsRepository;
-
-    @Autowired
     private CategoryRepository categoryRepository;
-
-    @Autowired
     private UsersRepository usersRepository;
 
+    @Autowired
+    public AnnouncementService(AnnouncementsRepository announcementsRepository, CategoryRepository categoryRepository, UsersRepository usersRepository) {
+        this.announcementsRepository = announcementsRepository;
+        this.categoryRepository = categoryRepository;
+        this.usersRepository = usersRepository;
+    }
+
     public Announcements readAnnouncement(String announcementNumber) throws AnnouncementNotFoundException {
-        Announcements announcementToReturn = null;
-        List<Announcements> announcementsFromDB = announcementsRepository.findAll();
-        for (Announcements a : announcementsFromDB) {
-            if (a.getAnnouncementNumber().equals(announcementNumber)){
-                announcementToReturn = a;
-            }
-        }
-        if (announcementToReturn == null){
+        Announcements announcementsFromDB = announcementsRepository.findByAnnouncementNumber(announcementNumber);
+        if (announcementNumber == null){
             throw new AnnouncementNotFoundException(ConstantMessages.ANNOUNCEMENT_NOT_FOUND_EXCEPTION);
         }
-        return announcementToReturn;
+        return announcementsFromDB;
     }
 
     public Announcements createAnnouncement(Announcements announcement) throws InvalidPropertyException {
@@ -64,17 +61,30 @@ public class AnnouncementService {
         Announcements announcement = readAnnouncement(announcementNumber);
         switch (field){
             case "announcementName":
+                if (data.isEmpty()){
+                    throw new InvalidPropertyException(ConstantMessages.INVALID_NAME_ANNOUNCEMENT_EXCEPTION);
+                }
                 announcement.setAnnouncementName(data);
                 break;
             case "announcementNumber":
                 throw new NonUpdateablePropertyException(ConstantMessages.NON_UPDATEABLE_ANNOUNCEMENT_NUMBER_EXCEPTIONS);
             case "price":
-                announcement.setPrice(Double.parseDouble(data));
+                try {
+                    announcement.setPrice(Double.parseDouble(data));
+                }catch (NumberFormatException e){
+                    throw new InvalidPropertyException(ConstantMessages.INVALID_PRICE_ANNOUNCEMENT_EXCEPTION);
+                }
                 break;
             case "descriptions":
+                if (data.isEmpty()){
+                    throw new InvalidPropertyException(ConstantMessages.INVALID_DESCRIPTION_ANNOUNCEMENT_EXCEPTION);
+                }
                 announcement.setDescriptions(data);
                 break;
             case "status":
+                if (!(data.equals(AnnouncementStatus.ACTIVE.name()) || data.equals(AnnouncementStatus.INACTIVE.name()))){
+                    throw new InvalidPropertyException(ConstantMessages.INVALID_STATUS_EXCEPTION);
+                }
                 announcement.setStatus(data);
                 break;
             case "categoryID":

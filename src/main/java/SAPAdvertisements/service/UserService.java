@@ -1,52 +1,40 @@
 package SAPAdvertisements.service;
 
 import SAPAdvertisements.common.ConstantMessages;
-import SAPAdvertisements.exeptions.InvalidPropertyException;
 import SAPAdvertisements.exeptions.NonUpdateablePropertyException;
 import SAPAdvertisements.exeptions.AlreadyExistsException;
 import SAPAdvertisements.exeptions.UserNotFoundException;
 import SAPAdvertisements.models.Users;
 import SAPAdvertisements.repository.UsersRepository;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+
 @Service
 public class UserService {
 
+    private final UsersRepository usersRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    private UsersRepository usersRepository;
-
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    public UserService() {
-
+    public UserService(UsersRepository usersRepository, PasswordEncoder passwordEncoder) {
+        this.usersRepository = usersRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public Users readUser(String username) throws UserNotFoundException {
-        Users userToReturn = null;
-        List<Users> usersFromDB = usersRepository.findByUsername(username);
-        for (Users u : usersFromDB) {
-            if (u.getUsername().equals(username)){
-                userToReturn = u;
-            }
-        }
-        if (userToReturn == null){
+        Users usersFromDB = usersRepository.findByUsername(username);
+        if (usersFromDB == null){
             throw new UserNotFoundException(ConstantMessages.USER_NOT_FOUND_EXCEPTION);
         }
 
-        return userToReturn;
+        return usersFromDB;
     }
 
-    public Users createUser(Users user) throws InvalidPropertyException, AlreadyExistsException {
+    public Users createUser(Users user) throws AlreadyExistsException {
         if (registeredUsername(user.getUsername())){
             throw new AlreadyExistsException(ConstantMessages.USERNAME_ALREADY_EXIST_EXCEPTIONS);
         }
@@ -60,7 +48,7 @@ public class UserService {
           return usersRepository.save(user);
     }
 
-    public Users updateUserData(String username, String field, String data) throws UserNotFoundException, InvalidPropertyException, AlreadyExistsException, NonUpdateablePropertyException {
+    public Users updateUserData(String username, String field, String data) throws UserNotFoundException, AlreadyExistsException, NonUpdateablePropertyException {
         Users user = readUser(username);
         switch (field){
             case "username":
@@ -91,7 +79,7 @@ public class UserService {
 
 
     public boolean registeredUsername(String name){
-        List<Users> usersFromFile = usersRepository.findByUsername(name);
+        List<Users> usersFromFile = usersRepository.getUserByUsername(name);
         for (Users u:usersFromFile) {
             if (u.getUsername().equals(name)){
                 return true;
@@ -110,10 +98,8 @@ public class UserService {
         return false;
     }
 
-
     public Users findUserById(String username) {
-        return usersRepository.getUserByUsername(username);
+        return usersRepository.findByUsername(username);
     }
-
 }
 

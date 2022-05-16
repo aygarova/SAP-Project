@@ -5,7 +5,7 @@ import java.util.*;
 
 @Entity
 @Table(name = "users")
-public class Users implements UserDetails {
+public class Users {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,16 +34,13 @@ public class Users implements UserDetails {
 
     public Users() {}
 
-    public Users(int user_id,String username, String password, String phoneNumber, String email, String userType,Boolean locked,
-                 Boolean enabled) {
+    public Users(int user_id,String username, String password, String phoneNumber, String email, String userType) {
         this.user_id = user_id;
         this.username = username;
         this.password = password;
         this.phoneNumber = phoneNumber;
         this.email = email;
         this.userType = userType;
-        this.locked = locked;
-        this.enabled = enabled;
     }
 
     public Users(int user_id) {
@@ -62,34 +59,8 @@ public class Users implements UserDetails {
         return username;
     }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return !locked;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return enabled;
-    }
-
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        SimpleGrantedAuthority authority = new SimpleGrantedAuthority(userType);
-        return Collections.singleton(authority);
     }
 
     public String getPassword() {
@@ -124,21 +95,21 @@ public class Users implements UserDetails {
         this.userType = userType;
     }
 
-    public Set<Announcements> getAnnouncements() {
-        return announcements;
-    }
+//    public Set<Announcements> getAnnouncements() {
+//        return announcements;
+//    }
+//
+//    public void setAnnouncements(Set<Announcements> announcements) {
+//        this.announcements = announcements;
+//    }
 
-    public void setAnnouncements(Set<Announcements> announcements) {
-        this.announcements = announcements;
-    }
-
-    @Override
-    public String toString() {
-        return "Username = " + username +
-                ", password = " + password +
-                ", phoneNumber = " + phoneNumber +
-                ", email = " + email +
-                ", userType = " + userType;
-    }
+//    @Override
+//    public String toString() {
+//        return "Username = " + username +
+//                ", password = " + password +
+//                ", phoneNumber = " + phoneNumber +
+//                ", email = " + email +
+//                ", userType = " + userType;
+//    }
 
 }

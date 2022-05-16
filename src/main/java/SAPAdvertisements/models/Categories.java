@@ -10,7 +10,7 @@ public class Categories {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int category_id;
 
-    @Column(name = "category_name", nullable = false)
+    @Column(name = "category_name", nullable = false, unique = true)
     private String categoryName;
 
     @OneToMany(mappedBy = "category_id", fetch = FetchType.EAGER)
@@ -48,9 +48,4 @@ public class Categories {
         this.categoryName = categoryName;
     }
 
-    @Override
-    public String toString() {
-        return "Category_id=" + category_id +
-                ", categoryName='" + categoryName ;
-    }
 }
